@@ -80,6 +80,13 @@ def recommend():
         movie_name=request.form.get('movie')
         if movie_name:
             recommendations=predict(movie_name)
+
+            result = ','.join(recommendations)
+            user = User(movie = movie_name, result = result, created = '')
+            db.session.add(user)
+            db.session.commit()
+            print('report saved!!')
+            
             print('r', recommendations)
             return render_template('recommend.html', names=recommendations, movie = movie_name)
     return render_template('recommend.html')
