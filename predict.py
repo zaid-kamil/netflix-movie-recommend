@@ -2,6 +2,7 @@ from fuzzywuzzy import fuzz
 import pickle
 import os, json
 from scipy.sparse import load_npz
+import pandas as pd
 
 def fuzzy_matching(mapper, fav_movie, verbose=True):
     """
@@ -32,7 +33,9 @@ def fuzzy_matching(mapper, fav_movie, verbose=True):
         return
     if verbose:
         print('Found possible matches in our database: {0}\n'.format([x[0] for x in match_tuple]))
+    print(match_tuple[0][1])
     return match_tuple[0][1]
+
 
 
 
@@ -87,7 +90,7 @@ def make_recommendation(model_knn, data, mapper, fav_movie, n_recommendations):
     for i, (idx, dist) in enumerate(raw_recommends):
         print('{0}: {1}, with distance of {2}'.format(i+1, reverse_mapper[idx], dist))
         recommendation.append(reverse_mapper[idx])
-    return recommendation
+    return recommendation, idx
 
 
 
@@ -99,10 +102,14 @@ def predict(user_input):
     sparse_matrix=load_npz(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'trained_data/sparse_matric.npz'))
     trained_model=pickle.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'trained_data/trained_model.sav'), 'rb'))
 
-    prediction = make_recommendation(model_knn=trained_model, data=sparse_matrix, fav_movie=user_input, mapper=mapper, n_recommendations=10)
+    prediction, id = make_recommendation(model_knn=trained_model, data=sparse_matrix, fav_movie=user_input, mapper=mapper, n_recommendations=10)
 
     return prediction
 
+def getRatingsCount(movie_id):
+    df = pd.read_csv('dataset/ratings.csv')
+    count = df.loc[df['movieId'] == 8542].count()[0]
+    return count
 
 
 if __name__ == "__main__":

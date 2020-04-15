@@ -10,130 +10,84 @@
     <link rel="stylesheet" href="static/assets/fonts/font-awesome.min.css">
     <link rel="stylesheet" href="static/assets/fonts/simple-line-icons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+    <style>
+        .mid-card{
+            box-shadow: 3px 3px 5px 1px rgba(0, 0, 0, 0.698);
+        }
+        .header-mg{
+            background: url('static/assets/img/bg-masthead.jpg') no-repeat center center;
+            background-size:cover
+        }
+    </style>
 </head>
 
 <body>
-    <nav class="navbar navbar-light navbar-expand bg-light navigation-clean">
-        <div class="container"><a class="navbar-brand" href="#">Brand</a><button data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1"></button>
-            <div class="collapse navbar-collapse" id="navcol-1">
-                <a class="btn btn-primary ml-auto" role="button" href="/signin">Sign In</a>
-                <a class="btn btn-primary ml-3" role="button" href="/logout">Logout</a>
-            </div>
+    
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">Movie Recommendation System</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+            </li>
+            {% if not loggedin %}
+            <li class="nav-item">
+              <a class="nav-link" href="/signin">login</a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="/logout">logout</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" style="color: black;"><strong>Hello {{loggedin}}</strong></a>
+            </li>
+            {% endif %}
+          </ul>
         </div>
-    </nav>
-    <header class="masthead text-white text-center" style="background:url('static/assets/img/bg-masthead.jpg')no-repeat center center;background-size:cover;">
+      </nav>
+
+    <header class="masthead text-white text-center header-mg" style="">
         <div class="overlay"></div>
         <div class="container">
             <div class="row">
-                <div class="col-xl-9 mx-auto">
-                    <h1 class="mb-5">Build a landing page for your business or project and generate more leads!</h1>
+                <div class="col-xl-10 mx-auto">
+                    <h1>AI based Movie Recommendation System</h1>
+                    <h3 class="mb-5">Proposed system is based on a Machine Learning Prediction Model to predict movie recommendation for the customers.</h3>
                 </div>
                 <div class="col-md-10 col-lg-8 col-xl-7 mx-auto">
-                    <form action="/recommend" method="POST">
+                    
                         <div class="form-row">
-                            <div class="col-12 col-md-8 mb-2 mb-md-0"><input class="form-control form-control-lg" name="movie" placeholder="Enter a Movie name..." required></div>
-                            <div class="col-12 col-md-4"><button class="btn btn-primary btn-block btn-lg" type="submit">Get Recommendations!</button></div>
+                            <div class="col-12 col-md-8 mb-2 mb-md-0"><input class="form-control form-control-lg" id="movie" name="movie" placeholder="Enter a Movie name..." required></div>
+                            <div class="col-12 col-md-4"><button class="btn btn-primary btn-block btn-lg" type="submit" id="rec">Submit</button></div>
                         </div>
-                    </form>
+
                 </div>
             </div>
         </div>
     </header>
-    <section class="features-icons bg-light text-center">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-4">
-                    <div class="mx-auto features-icons-item mb-5 mb-lg-0 mb-lg-3">
-                        <div class="d-flex features-icons-icon"><i class="icon-screen-desktop m-auto text-primary" data-bs-hover-animate="pulse"></i></div>
-                        <h3>Fully Responsive</h3>
-                        <p class="lead mb-0">This theme will look great on any device, no matter the size!</p>
+    
+    <section class="bg-light">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card mt-5 mid-card" style="border-left: 3px solid rgb(49, 209, 0);" id="report-card">
+                    <div class="card-body">
+                        <h3>View Previous Recommendations</h3>
                     </div>
                 </div>
-                <div class="col-lg-4">
-                    <div class="mx-auto features-icons-item mb-5 mb-lg-0 mb-lg-3">
-                        <div class="d-flex features-icons-icon"><i class="icon-layers m-auto text-primary" data-bs-hover-animate="pulse"></i></div>
-                        <h3>Bootstrap 4 Ready</h3>
-                        <p class="lead mb-0">Featuring the latest build of the new Bootstrap 4 framework!</p>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="mx-auto features-icons-item mb-5 mb-lg-0 mb-lg-3">
-                        <div class="d-flex features-icons-icon"><i class="icon-check m-auto text-primary" data-bs-hover-animate="pulse"></i></div>
-                        <h3>Easy to Use</h3>
-                        <p class="lead mb-0">Ready to use with your own content, or customize the source files!</p>
+        
+                <div class="card mt-5 mid-card" style="border-right: 3px solid rgb(0, 88, 189);" id="train-card">
+                    <div class="card-body text-right">
+                        <h3>Retrain AI Model</h3>
+                        <p>Retrain AI model with dataset for better recommendations</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-    <section class="showcase">
-        <div class="container-fluid p-0">
-            <div class="row no-gutters">
-                <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image:url(&quot;static/assets/img/bg-showcase-1.jpg&quot;);"><span></span></div>
-                <div class="col-lg-6 my-auto order-lg-1 showcase-text">
-                    <h2>Fully Responsive Design</h2>
-                    <p class="lead mb-0">When you use a theme created with Bootstrap, you know that the theme will look great on any device, whether it's a phone, tablet, or desktop the page will behave responsively!</p>
-                </div>
-            </div>
-            <div class="row no-gutters">
-                <div class="col-lg-6 text-white showcase-img" style="background-image:url(&quot;static/assets/img/bg-showcase-2.jpg&quot;);"><span></span></div>
-                <div class="col-lg-6 my-auto order-lg-1 showcase-text">
-                    <h2>Updated For Bootstrap 4</h2>
-                    <p class="lead mb-0">Newly improved, and full of great utility classes, Bootstrap 4 is leading the way in mobile responsive web development! All of the themes are now using Bootstrap 4!</p>
-                </div>
-            </div>
-            <div class="row no-gutters">
-                <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image:url(&quot;static/assets/img/bg-showcase-3.jpg&quot;);"><span></span></div>
-                <div class="col-lg-6 my-auto order-lg-1 showcase-text">
-                    <h2>Easy to Use &amp;&nbsp;Customize</h2>
-                    <p class="lead mb-0">Landing Page is just HTML and CSS with a splash of SCSS for users who demand some deeper customization options. Out of the box, just add your content and images, and your new landing page will be ready to go!</p>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section class="testimonials text-center bg-light">
-        <div class="container">
-            <h2 class="mb-5">What people are saying...</h2>
-            <div class="row">
-                <div class="col-lg-4">
-                    <div class="mx-auto testimonial-item mb-5 mb-lg-0"><img class="rounded-circle img-fluid mb-3" src="static/assets/img/testimonials-1.jpg">
-                        <h5>Margaret E.</h5>
-                        <p class="font-weight-light mb-0">"This is fantastic! Thanks so much guys!"</p>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="mx-auto testimonial-item mb-5 mb-lg-0"><img class="rounded-circle img-fluid mb-3" src="static/assets/img/testimonials-2.jpg">
-                        <h5>Fred S.</h5>
-                        <p class="font-weight-light mb-0">"Bootstrap is amazing. I've been using it to create lots of super nice landing pages."</p>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="mx-auto testimonial-item mb-5 mb-lg-0"><img class="rounded-circle img-fluid mb-3" src="static/assets/img/testimonials-3.jpg">
-                        <h5>Sarah W.</h5>
-                        <p class="font-weight-light mb-0">"Thanks so much for making these free resources available to us!"</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <section class="call-to-action text-white text-center" style="background:url(&quot;static/assets/img/bg-masthead.jpg&quot;) no-repeat center center;background-size:cover;">
-        <div class="overlay"></div>
-        <div class="container">
-            <div class="row">
-                <div class="col-xl-9 mx-auto">
-                    <h2 class="mb-4">Ready to get started? Sign up now!</h2>
-                </div>
-                <div class="col-md-10 col-lg-8 col-xl-7 mx-auto">
-                    <form>
-                        <div class="form-row">
-                            <div class="col-12 col-md-9 mb-2 mb-md-0"><input class="form-control form-control-lg" type="email" placeholder="Enter your email..."></div>
-                            <div class="col-12 col-md-3"><button class="btn btn-primary btn-block btn-lg" type="submit">Sign up!</button></div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
+
     <footer class="footer bg-light">
         <div class="container">
             <div class="row">
@@ -159,9 +113,64 @@
             </div>
         </div>
     </footer>
+
     <script src="static/assets/js/jquery.min.js"></script>
     <script src="static/assets/bootstrap/js/bootstrap.min.js"></script>
     <script src="static/assets/js/bs-init.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+
+    <script>
+        $(document).ready(() => {
+            $('#rec').click(() => {
+                $.ajax({url : '/recommend', data : {movie : $('#movie').val()}, method : "get", complete : (data) => {
+                    console.log(data);
+                    sessionStorage.setItem('data', JSON.stringify(data.responseJSON));
+                    window.location.replace('/showresult')
+                },
+                beforeSend: () => {
+                    Swal.fire({
+                        title: 'Predicting Results!',
+                        html: 'This may take some time',
+                        timerProgressBar: true,
+                        onBeforeOpen: (
+                            
+                        ) => {
+                            Swal.showLoading();
+                        },
+                        })
+                },
+                })
+            });
+
+            $('#train-card').click(() => {
+                $.ajax({url : '/trainmodel', data : {}, method : "get", complete : (data) => {
+                    console.log(data);
+                    Swal.fire({
+                        icon : 'success',
+                        title : 'Model Trained!',
+                        text : 'Training completed successfully'
+                    })
+                },
+                beforeSend: () => {
+                    Swal.fire({
+                        title: 'Training AI Model!',
+                        html: 'This may take some time',
+                        timerProgressBar: true,
+                        onBeforeOpen: (
+                            
+                        ) => {
+                            Swal.showLoading();
+                        },
+                        })
+                },
+                })
+            });
+
+            $('#report-card').click(() => {
+                window.location.replace('/showreport')
+            })
+            });
+    </script>
 </body>
 
 </html>

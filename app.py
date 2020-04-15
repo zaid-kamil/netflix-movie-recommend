@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, jsonify, redirect, session
 from predict import predict
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+
 
 app=Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -18,7 +20,7 @@ class User(db.Model):
 
 class Search(db.Model):
     id = db.Column(db.Integer, primary_key = True)
-    movie = db.Column(db.String(30), unique = True, nullable = False)
+    movie = db.Column(db.String(30), nullable = False)
     result = db.Column(db.String(20), nullable = True)
     created = db.Column(db.String(30), nullable = False)
 
@@ -32,7 +34,7 @@ db.create_all()
 def home():
     if not session.get('user'):
         return redirect('/signin')
-    return render_template('index.html')
+    return render_template('index.html', loggedin = session.get('user'))
 
 @app.route('/signin', methods = ["POST", "GET"])
 def Signin():
@@ -72,24 +74,44 @@ def Logout():
     session['user'] = None
     return redirect('/signin')
 
-@app.route('/recommend', methods=['GET', 'POST'])
-def recommend():
+@app.route('/showreport')
+def showReport():
     if not session.get('user'):
         return redirect('/signin')
-    if request.method=='POST':
-        movie_name=request.form.get('movie')
-        if movie_name:
-            recommendations=predict(movie_name)
 
-            result = ','.join(recommendations)
-            user = User(movie = movie_name, result = result, created = '')
-            db.session.add(user)
-            db.session.commit()
-            print('report saved!!')
-            
-            print('r', recommendations)
-            return render_template('recommend.html', names=recommendations, movie = movie_name)
-    return render_template('recommend.html')
+    reports = Search.query.all()
+    for report in reports:
+        report.result = report.result.split(',')
+    return render_template('report.html', reports = reports, loggedin = session.get('user'))
+
+@app.route('/recommend')
+def recommend():
+
+    movie_name=request.args.get('movie')
+    if movie_name:
+        recommendations=predict(movie_name)
+
+        result = ','.join(recommendations)
+        user = Search(movie = movie_name, result = result, created = datetime.today().strftime("%d/%m/%Y"))
+        db.session.add(user)
+        db.session.commit()
+        print('report saved!!')
+        
+        print('r', recommendations)
+
+        return jsonify(recommendations)
+
+@app.route('/showresult')
+def showResult():
+    if not session.get('user'):
+        return redirect('/signin')
+    return render_template('recommend.html', loggedin = session.get('user'))
+
+@app.route('/trainmodel')
+def train():
+    from train import train_model
+    train_model('dataset/ratings.csv', 'dataset/movies.csv')
+    return jsonify('success')
 
 if __name__ == "__main__":
     app.run(debug=True)
