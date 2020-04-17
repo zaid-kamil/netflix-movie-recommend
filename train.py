@@ -1,4 +1,3 @@
-print('importing modules...\n')
 import os
 import time
 
@@ -50,11 +49,6 @@ def train_model(ratings_file, movies_file):
     # get rating frequency
     df_movies_cnt = pd.DataFrame(df_ratings.groupby('movieId').size(), columns=['count'])
 
-    # filter data
-    popularity_thres = 50
-    popular_movies = list(set(df_movies_cnt.query('count >= @popularity_thres').index))
-    df_ratings_drop_movies = df_ratings[df_ratings.movieId.isin(popular_movies)]
-
     # get number of ratings given by every user
     df_users_cnt = pd.DataFrame(df_ratings_drop_movies.groupby('userId').size(), columns=['count'])
 
@@ -86,6 +80,7 @@ def train_model(ratings_file, movies_file):
     pickle.dump(model_knn, open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'trained_data/trained_model.sav'), 'wb'))
 
 if __name__ == "__main__":
-    ratings_file=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'dataset/ratings.csv')
-    movies_file=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'dataset/movies.csv')
+    print('importing modules...\n')
+    ratings_file=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'datasets/ratings.csv')
+    movies_file=os.path.join(os.path.dirname(os.path.realpath(__file__)), 'datasets/movies.csv')
     train_model(ratings_file, movies_file)

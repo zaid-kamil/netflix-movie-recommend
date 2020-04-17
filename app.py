@@ -6,7 +6,7 @@ from datetime import datetime
 
 app=Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-app.secret_key = "Resident Evil 4 remake has been announced!!"
+app.secret_key = "easldkjhja akldhjalksj"
 db = SQLAlchemy(app)
 
 class User(db.Model):
@@ -16,7 +16,7 @@ class User(db.Model):
     password = db.Column(db.String(30), nullable = False)
 
     def __repr__(self):
-        return f'self.username, self.email, self.password'
+        return f'{self.username}'
 
 class Search(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -25,7 +25,7 @@ class Search(db.Model):
     created = db.Column(db.String(30), nullable = False)
 
     def __repr__(self):
-        return f'self.username, self.email, self.password'
+        return self.id
 
 db.create_all()
 
@@ -92,8 +92,8 @@ def recommend():
         recommendations=predict(movie_name)
 
         result = ','.join(recommendations)
-        user = Search(movie = movie_name, result = result, created = datetime.today().strftime("%d/%m/%Y"))
-        db.session.add(user)
+        search  = Search(movie = movie_name, result = result, created = datetime.today().strftime("%d/%m/%Y"))
+        db.session.add(search)
         db.session.commit()
         print('report saved!!')
         
@@ -110,7 +110,7 @@ def showResult():
 @app.route('/trainmodel')
 def train():
     from train import train_model
-    train_model('dataset/ratings.csv', 'dataset/movies.csv')
+    train_model('datasets/ratings.csv', 'datasets/movies.csv')
     return jsonify('success')
 
 if __name__ == "__main__":
