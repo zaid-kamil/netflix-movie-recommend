@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify, redirect, session
 from predict import predict
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-
+from movie_finder import find
 
 app=Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -23,7 +23,7 @@ class Search(db.Model):
     movie = db.Column(db.String(30), nullable = False)
     result = db.Column(db.String(20), nullable = True)
     created = db.Column(db.String(30), nullable = False)
-
+    
     def __repr__(self):
         return self.id
 
@@ -112,6 +112,16 @@ def train():
     from train import train_model
     train_model('datasets/ratings.csv', 'datasets/movies.csv')
     return jsonify('success')
+
+@app.route('/moviedata')
+def get_moviedata():
+    movie = request.args.get('movie')
+    result = find(movie)
+    if result: 
+        print("out",result)
+        output = {k:v for k,v in result.items()}
+        return jsonify({'movie':output})
+    return jsonify({'movie':movie})
 
 if __name__ == "__main__":
     app.run(debug=True)

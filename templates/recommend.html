@@ -13,17 +13,9 @@
 <div class="container mt-5" id="top-con">
     <p class="h1 text-center text-light">AI Netflix Movie Recommendation</p>
     <p class="h3 text-center text-light">Prediction Results</p>
-    <div class="row justify-content-center mt-5">
+    <div class="row justify-content-center mt-5" id="results">
         
-        <div class="col-md-8">
-
-          <div class="text-light h3">
-            <ul class="list-group" id="results">
-
-            </ul>
-          </div>
-
-        </div>
+        
     </div>
 </div>
 
@@ -33,14 +25,42 @@
 <script>
   $(document).ready(() => {
     let data = JSON.parse(sessionStorage.getItem('data'));
-    console.log(data);
+
     if(data.length){
         data.forEach( element => {
-                    $('#results').append(`<li class="list-group-item bg-dark dg">${element}</li>`)
-                })
+          $.ajax({
+            type: "GET",
+            dataType: "text/javascript",
+            url: "/moviedata",
+            data: {'movie':element},
+            success: function (response) {
+              movie = response.movie
+              console.log(response)
+            },
+            error:function(e){
+              var obj = JSON.parse(e.responseText)
+              if(obj.hasOwnProperty('movie')){
+                console.log(obj)
+                $('#results').append( '<div class="col-3 h-100 my-2">'+
+                  '<div class="card">'+
+                                      `<img class="card-img-top" src="${obj.movie['full-size cover url']}" alt="">`+
+                                      '<div class="card-body">'+
+                                        `<h5 class="card-title">${obj.movie.title}</h5>`+
+                                        `<div class="card-body">`+
+                                        `<p> Year: ${obj.movie.year}</p>`+
+                                        `<p class="text-sm">Synopsis: ${obj.movie.synopsis[0].substring(0, 100)}...</p>`+
+                                        `<p>Tags: ${obj.movie.taglines[0]}</p>`+
+                                        `<p>Rating : ${obj.movie.median}</p>`+
+                                        '</div></div></div></div>') 
+                }
+            }
+          });
+         
+      });
     }else{
         $('#top-con').append(`<p class="display-4 text-center">No Data Found</p>`)
     }
   });
 </script>
 {% endblock %}
+

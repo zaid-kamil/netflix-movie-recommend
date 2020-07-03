@@ -103,7 +103,7 @@ def predict(user_input):
     trained_model=pickle.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'trained_data/trained_model.sav'), 'rb'))
 
     prediction, id = make_recommendation(model_knn=trained_model, data=sparse_matrix, fav_movie=user_input, mapper=mapper, n_recommendations=10)
-
+    print(prediction,id)
     return prediction
 
 def getRatingsCount(movie_id):
