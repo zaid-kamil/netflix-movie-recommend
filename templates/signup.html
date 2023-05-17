@@ -1,20 +1,20 @@
 {% extends 'layout.html' %}
 
 {% block css %}
-    <style>
-        .reg-top{
-            background-image: url('static/reg-top.jpg');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: cover;
-        }
-    </style>
+<style>
+    .reg-top {
+        background-image: url('static/reg-top.jpg');
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: cover;
+    }
+</style>
 {% endblock %}
 
 {% block body %}
 
 <div class="container" style="margin-top: 10rem;">
-    <p class="h1 text-center text-light">AI Netflix Movie Recommendation</p>
+    <p class="h1 text-center text-light">AI Movie Recommendation</p>
     <div class="card bg-dark">
         <div class="row justify-content-center card-body">
             <div class="col-md-7 reg-top">
@@ -22,7 +22,7 @@
             </div>
             <div class="col-md-5">
                 <div class="card-body text-light">
-                
+
                     <p class="h2 text-center">SIGN UP</p>
                     <hr>
                     <form method="post">
@@ -31,10 +31,10 @@
 
                         <label class="mt-4">Email</label>
                         <input class="form-control" name="email" required>
-        
+
                         <label class="mt-4">Password</label>
                         <input class="form-control mb-5" name="password" type="password" required>
-                        
+
                         <button class="btn btn-danger btn-block mt-5">Sign Up</button>
                     </form>
                     <hr>

@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, redirect, session
-from predict import predict
+from predict import recommend_movie
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from movie_finder import find
@@ -27,7 +27,7 @@ class Search(db.Model):
     def __repr__(self):
         return self.id
 
-db.create_all()
+
 
 @app.route('/')
 @app.route('/home')
@@ -86,32 +86,28 @@ def showReport():
 
 @app.route('/recommend')
 def recommend():
-
     movie_name=request.args.get('movie')
     if movie_name:
-        recommendations=predict(movie_name)
-
-        result = ','.join(recommendations)
+        recommendations=recommend_movie(movie_name)
+        if recommendations == "No recommendation for this movie":
+            result = "not avaiable in database"
+            return jsonify([result])
+        else:
+            result = ','.join(recommendations)
         search  = Search(movie = movie_name, result = result, created = datetime.today().strftime("%d/%m/%Y"))
         db.session.add(search)
         db.session.commit()
         print('report saved!!')
-        
-        print('r', recommendations)
-
+        print(recommendations)
         return jsonify(recommendations)
+    
+
 
 @app.route('/showresult')
 def showResult():
     if not session.get('user'):
         return redirect('/signin')
     return render_template('recommend.html', loggedin = session.get('user'))
-
-@app.route('/trainmodel')
-def train():
-    from train import train_model
-    train_model('datasets/ratings.csv', 'datasets/movies.csv')
-    return jsonify('success')
 
 @app.route('/moviedata')
 def get_moviedata():
@@ -124,4 +120,6 @@ def get_moviedata():
     return jsonify({'movie':movie})
 
 if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)

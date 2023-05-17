@@ -1,116 +1,64 @@
-from fuzzywuzzy import fuzz
-import pickle
-import os, json
-from scipy.sparse import load_npz
 import pandas as pd
-
-def fuzzy_matching(mapper, fav_movie, verbose=True):
-    """
-    return the closest match via fuzzy ratio. If no match found, return None
-    
-    Parameters
-    ----------    
-    mapper: dict, map movie title name to index of the movie in data
-
-    fav_movie: str, name of user input movie
-    
-    verbose: bool, print log if True
-
-    Return
-    ------
-    index of the closest match
-    """
-    match_tuple = []
-    # get match
-    for title, idx in mapper.items():
-        ratio = fuzz.ratio(title.lower(), fav_movie.lower())
-        if ratio >= 60:
-            match_tuple.append((title, idx, ratio))
-    # sort
-    match_tuple = sorted(match_tuple, key=lambda x: x[2])[::-1]
-    if not match_tuple:
-        print('Oops! No match is found')
-        return
-    if verbose:
-        print('Found possible matches in our database: {0}\n'.format([x[0] for x in match_tuple]))
-    print(match_tuple[0][1])
-    return match_tuple[0][1]
+import numpy as np
+from textblob import TextBlob
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
+from sklearn.impute import SimpleImputer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from nltk.corpus import stopwords
+from joblib import dump, load
 
 
 
+def remove_stopwords(text):
+    blob = TextBlob(text)
+    words = blob.words
+    filtered_words = [word for word in words if word not in stopwords.words('english')]
+    filtered_text = ' '.join(filtered_words)
+    return filtered_text
 
-def make_recommendation(model_knn, data, mapper, fav_movie, n_recommendations):
-    """
-    return top n similar movie recommendations based on user's input movie
+def recommend_movie(title, size=10):
+    df = pd.read_csv('datasets/imdb_top_1000.csv', index_col='Series_Title')
+    # vec = load('models/tfidf.joblib')
+    sim = load('models/similarity.joblib')
+    print(f'title=>{title}')
+    idx = get_index_by_movie(df, title.lower())
+    if idx == -1:
+        return "No recommendation for this movie"
+    else:
+        sim_scores = list(enumerate(sim[idx]))
+        sim_scores = sorted(sim_scores, key=lambda x: x[-1], reverse=True)
+        sim_scores = sim_scores[1:size+1]
+        movie_indices = [i[0] for i in sim_scores]
+        # df.info()
+        return df.iloc[movie_indices].index.to_list()
 
+def get_index_by_movie(temp, title):
+    # make index to lower case
+    temp.index = temp.index.str.lower()
+    title = title.lower()
+    if title in temp.index :
+        return temp.index.get_loc(title)
+    else:
+        return -1
 
-    Parameters
-    ----------
-    model_knn: sklearn model, knn model
-
-    data: movie-user matrix
-
-    mapper: dict, map movie title name to index of the movie in data
-
-    fav_movie: str, name of user input movie
-
-    n_recommendations: int, top n recommendations
-
-    Return
-    ------
-    list of top n similar movie recommendations
-    """
-    # fit
-    model_knn.fit(data)
-    # get input movie index
-    print('You have input movie:', fav_movie)
-    idx = fuzzy_matching(mapper, fav_movie, verbose=True)
-    # inference
-    print('Recommendation system start to make inference')
-    print('......\n')
-
-    try:
-        distances, indices = model_knn.kneighbors(data[idx], n_neighbors=n_recommendations+1)
-    except Exception as e:
-        print('Exception occured')
-        print(e)
-
-
-        return []
-
-
-    # get list of raw idx of recommendations
-    raw_recommends = \
-        sorted(list(zip(indices.squeeze().tolist(), distances.squeeze().tolist())), key=lambda x: x[1])[:0:-1]
-    # get reverse mapper
-    reverse_mapper = {v: k for k, v in mapper.items()}
-    # print recommendations
-    print('Recommendations for {}:'.format(fav_movie))
-    recommendation=[]
-    for i, (idx, dist) in enumerate(raw_recommends):
-        print('{0}: {1}, with distance of {2}'.format(i+1, reverse_mapper[idx], dist))
-        recommendation.append(reverse_mapper[idx])
-    return recommendation, idx
+def main():
+    df = pd.read_csv('datasets/imdb_top_1000.csv')
+    # Data Cleaning
+    df['data'] = df['Series_Title'] + ' ' + df['Released_Year'] + ' ' + df['Genre'] + ' ' + df['Director'] + ' ' + df['Star1'] + ' ' + df['Star2'] + ' ' + df['Star3'] + ' ' + df['Star4']+ ' ' + df['Overview']
+    df['data'] = df['data'].str.replace('[^\w\s]','', regex=True) # remove punctuation
+    df['data'] = df['data'].str.lower() # convert to lowercase
+    df['clean_data'] = df['data'].apply(remove_stopwords)
+    df['clean_data'] = df['clean_data'].str.lower() # convert to lowercase
+    vec = TfidfVectorizer()
+    vec_matrix = vec.fit_transform(df['clean_data'])
+    sim = cosine_similarity(vec_matrix, vec_matrix)
+    dump(vec, 'models/tfidf.joblib')
+    dump(sim, 'models/similarity.joblib')
 
 
+if __name__ == '__main__':
+    # main()
 
-
-def predict(user_input):
-    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'trained_data/mapper.json')) as f:
-        mapper=json.load(f)
-    print(type(mapper))
-    sparse_matrix=load_npz(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'trained_data/sparse_matric.npz'))
-    trained_model=pickle.load(open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'trained_data/trained_model.sav'), 'rb'))
-
-    prediction, id = make_recommendation(model_knn=trained_model, data=sparse_matrix, fav_movie=user_input, mapper=mapper, n_recommendations=10)
-    print(prediction,id)
-    return prediction
-
-def getRatingsCount(movie_id):
-    df = pd.read_csv('dataset/ratings.csv')
-    count = df.loc[df['movieId'] == 8542].count()[0]
-    return count
-
-
-if __name__ == "__main__":
-    print(predict('Conjuring'))
+    print(recommend_movie('The Dark Knight Rises'))

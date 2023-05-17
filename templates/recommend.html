@@ -2,8 +2,27 @@
 
 {% block css %}
 <style>
-  .dg{
+  .dg {
     border-left: 3px solid rgb(197, 213, 255);
+  }
+
+  .top-con {
+    background-color: #1a1a1a;
+    height: 100vh;
+    width: 100vw;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+  }
+
+  .loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 30px;
+    color: white;
   }
 </style>
 {% endblock %}
@@ -11,56 +30,69 @@
 {% block body %}
 
 <div class="container mt-5" id="top-con">
-    <p class="h1 text-center text-light">AI Netflix Movie Recommendation</p>
-    <p class="h3 text-center text-light">Prediction Results</p>
-    <div class="row justify-content-center mt-5" id="results">
-        
-        
-    </div>
-</div>
+  <p class="h1 text-center text-light">AI Movie Recommendation</p>
+  <p class="h3 text-center text-light">Prediction Results</p>
+  <div class="row justify-content-center mt-5" id="results">
 
+
+  </div>
+</div>
+<div class="top-con">
+
+</div>
 {% endblock %}
 
 {% block js %}
 <script>
   $(document).ready(() => {
     let data = JSON.parse(sessionStorage.getItem('data'));
+    // show loader on screen
+    $('#top-con').append(
+      `<div class="loader">
+      Loading...
+      </div>`)
 
-    if(data.length){
-        data.forEach( element => {
-          $.ajax({
-            type: "GET",
-            dataType: "text/javascript",
-            url: "/moviedata",
-            data: {'movie':element},
-            success: function (response) {
-              movie = response.movie
-              console.log(response)
-            },
-            error:function(e){
-              var obj = JSON.parse(e.responseText)
-              if(obj.hasOwnProperty('movie')){
-                console.log(obj)
-                $('#results').append( '<div class="col-3 h-100 my-2">'+
-                  '<div class="card">'+
-                                      `<img class="card-img-top" src="${obj.movie['full-size cover url']}" alt="">`+
-                                      '<div class="card-body">'+
-                                        `<h5 class="card-title">${obj.movie.title}</h5>`+
-                                        `<div class="card-body">`+
-                                        `<p> Year: ${obj.movie.year}</p>`+
-                                        `<p class="text-sm">Synopsis: ${obj.movie.synopsis[0].substring(0, 100)}...</p>`+
-                                        `<p>Tags: ${obj.movie.taglines[0]}</p>`+
-                                        `<p>Rating : ${obj.movie.median}</p>`+
-                                        '</div></div></div></div>') 
-                }
+
+    if (data.length) {
+      data.forEach(element => {
+        $.ajax({
+          type: "GET",
+          dataType: "text/javascript",
+          url: "/moviedata",
+          data: { 'movie': element },
+          success: function (response) {
+            movie = response.movie
+            console.log(response)
+            // hide
+            $('.top-con').hide()
+            $('.loader').hide()
+          },
+          error: function (e) {
+            var obj = JSON.parse(e.responseText)
+            console.log(obj)
+            if (obj.hasOwnProperty('movie')) {
+              console.log(obj)
+              $('#results').append('<div class="col-4 h-100 my-2">' +
+                '<div class="card">' +
+                `<img class="card-img-top" src="${obj.movie['full-size cover url']}" alt="">` +
+                '<div class="card-body">' +
+                `<h5 class="card-title">${obj.movie.title}</h5>` +
+                `<div class="card-body">` +
+                `<p> Year: ${obj.movie.year}</p>` +
+                `<p class="text-sm">Synopsis: ${obj.movie.synopsis[0].substring(0, 100)}...</p>` +
+                `<p>Tags: ${obj.movie.taglines[0]}</p>` +
+                `<p>Rating : ${obj.movie.median}</p>` +
+                '</div></div></div></div>')
             }
-          });
-         
+            $('.top-con').hide()
+            $('.loader').hide()
+          }
+        });
+
       });
-    }else{
-        $('#top-con').append(`<p class="display-4 text-center">No Data Found</p>`)
+    } else {
+      $('#top-con').append(`<p class="display-4 text-center">No Data Found</p>`)
     }
   });
 </script>
 {% endblock %}
-
